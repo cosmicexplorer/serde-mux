@@ -103,7 +103,7 @@ pub mod fingerprinting {
 
 pub use formats::key_fingerprint::KeyFingerprint;
 #[cfg(feature = "protobuf")]
-pub use formats::protobuf::Protobuf;
+pub use formats::protobuf::{Protobuf, ProtobufCodingFailure};
 pub mod formats {
   use super::traits::*;
 
@@ -147,7 +147,9 @@ pub mod formats {
   #[cfg(feature = "protobuf")]
   pub mod protobuf {
     use super::*;
-    use crate::util::encode_proto_message;
+
+    use displaydoc::Display;
+    use thiserror::Error;
 
     use std::{convert::TryInto, default::Default};
 
@@ -178,7 +180,7 @@ pub mod formats {
     {
       fn serialize(self) -> Box<[u8]> {
         let proto_message: Proto = self.0.into();
-        encode_proto_message(proto_message)
+        proto_message.encode_to_vec().into_boxed_slice()
       }
     }
 
@@ -200,6 +202,23 @@ pub mod formats {
       E: From<prost::DecodeError>,
       Proto: Schema+prost::Message+From<Proto::Source>+TryInto<Proto::Source, Error=E>+Default,
     {
+    }
+
+    /// Error type for specifics on failures to serialize or deserialize a protobuf-backed object.
+    #[derive(Debug, Display, Error)]
+    pub enum ProtobufCodingFailure {
+      /// an optional field '{0}' was absent when en/decoding protobuf {1}
+      OptionalFieldAbsent(&'static str, String),
+      /// an invalid state {0} was detected when en/decoding protobuf {1}
+      FieldCompositionWasIncorrect(String, String),
+      /// an error {1} occured trying to coax a byte slice to the correct length {0}
+      SliceLength(usize, String),
+      /// an error {0} occurred when en/decoding a protobuf map for the type {1}
+      MapStringCodingFailed(String, String),
+      /// a prost encoding error {0} was raised internally
+      Encode(#[from] prost::EncodeError),
+      /// a prost decoding error {0} was raised internally
+      Decode(#[from] prost::DecodeError),
     }
   }
 }

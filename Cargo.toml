@@ -12,6 +12,8 @@ edition                 = "2021"
 [dependencies]
 hex = "0.4.3"
 prost = { version = "0.10", optional = true }
+displaydoc              = { git = "https://github.com/yaahc/displaydoc", rev = "7159bb5c9d41ca3c7ccf04ae86ae3acb0ea12a27" }
+thiserror = "1.0.30"
 
 [features]
 default = []
