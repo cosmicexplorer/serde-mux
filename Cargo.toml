@@ -1,0 +1,18 @@
+[package]
+name                    = "serde-mux"
+description             = "Select among serde formats."
+authors                 = ["Danny McClanahan <dmcC2@hypnicjerk.ai>"]
+license                 = "LGPL-3.0-or-later"
+repository              = "https://github.com/cosmicexplorer/serde-mux"
+version                 = "0.0.0"
+edition                 = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+hex = "0.4.3"
+prost = { version = "0.10", optional = true }
+
+[features]
+default = []
+protobuf = ["prost"]
